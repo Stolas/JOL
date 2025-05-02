@@ -164,6 +164,13 @@ public class DoCommand {
             boolean top = Arrays.asList(cmdStr).contains("top");
             game.burn(player, cardId, srcPlayer, srcRegion, top);
         }
+        if (cmd.equalsIgnoreCase("rfg")) {
+            String srcPlayer = cmdObj.getPlayer(player);
+            String srcRegion = cmdObj.getRegion(JolGame.READY_REGION);
+            String cardId = cmdObj.findCard(srcPlayer, srcRegion);
+            boolean top = Arrays.asList(cmdStr).contains("top");
+            game.rfg(player, cardId, srcPlayer, srcRegion, top);
+        }
         if (cmd.equalsIgnoreCase("pool")) {
             String targetPlayer = cmdObj.getPlayer(player);
             int amount = cmdObj.getAmount(0);

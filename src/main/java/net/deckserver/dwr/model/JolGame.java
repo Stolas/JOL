@@ -1011,4 +1011,63 @@ public class JolGame {
         addCommand(message, new String[]{"burn", cardId, owner, ASH_HEAP});
         burnQuietly(cardId);
     }
+
+    void rfgQuietly(String cardId) {
+        Card card = state.getCard(cardId);
+        if (card == null) throw new IllegalArgumentException("No such card");
+
+        //Burn attached cards
+        for (Card c : card.getCards())
+            rfgQuietly(c.getId());
+
+        CardContainer source = card.getParent();
+        String owner = card.getOwner();
+        Location dest = state.getPlayerLocation(owner, RFG);
+
+        //Move to owner's ash heap
+        source.removeCard(card);
+        dest.addCard(card, false);
+
+        //Clear label
+        setText(cardId, "", true);
+
+        //Clear capacity
+        int capacity = getCapacity(cardId);
+        if (capacity > 0) //-1 means does not have capacity
+            changeCapacity(cardId, -capacity, true);
+
+        //Clear blood/life counters
+        int blood = getCounters(cardId);
+        if (blood > 0)
+            changeCounters(null, cardId, -blood, true);
+
+        //Unlock
+        setNotation(card, TAP, "false");
+    }
+
+    void rfg(String player, String cardId, String srcPlayer, String srcRegion, boolean top) {
+        Card card = state.getCard(cardId);
+        if (card == null) throw new IllegalArgumentException("No such card");
+
+        String owner = card.getOwner();
+        if (owner == null || owner.isEmpty())
+            throw new IllegalArgumentException("Game too old for rfg command");
+
+        //Message formats:
+        //Target is public: "<player> removes <card> from [#<region-index>] [<player>'s] <region> from the game"
+        //Target is private: "<player> removes <card> from [top of] [<player>'s] <region> from the game"
+
+        boolean showRegionOwner = !player.equals(srcPlayer);
+        String message = String.format(
+                "%s removes %s from %s%s %s",
+                player,
+                getCardName(card),
+                top ? "top of " : "",
+                showRegionOwner ? srcPlayer + "'s" : "their",
+                srcRegion,
+                "from the game");
+
+        addCommand(message, new String[]{"rfg", cardId, owner, RFG});
+        burnQuietly(cardId);
+    }
 }
