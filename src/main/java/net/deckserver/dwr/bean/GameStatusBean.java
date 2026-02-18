@@ -29,6 +29,7 @@ public class GameStatusBean {
     private final String predator;
     private final String prey;
     private final String turn;
+    private final OffsetDateTime lastAction;
 
     public GameStatusBean(String gameName) {
         this.name = gameName;
@@ -46,6 +47,7 @@ public class GameStatusBean {
             this.predator = game.getPredatorOf(activePlayer);
             this.prey = game.getPreyOf(activePlayer);
             this.turn = game.getTurnLabel();
+            this.lastAction = game.getLastAction();
         } else {
             this.gameStatus = "Inviting";
             players = Collections.emptyMap();
@@ -57,6 +59,7 @@ public class GameStatusBean {
             this.predator = null;
             this.prey = null;
             this.turn = null;
+            this.lastAction = null;
         }
         created = JolAdmin.getCreatedTime(gameName);
     }
@@ -65,6 +68,13 @@ public class GameStatusBean {
         return Optional.ofNullable(created)
                 .map(value -> value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                 .orElse(null);
+    }
+
+    public boolean isOld() {
+        if (!this.lastAction) { return false; }
+
+        OffsetDateTime oneWeekAgo = OffsetDateTime.now().minusWeeks(1);
+        return this.created.isBefore(oneWeekAgo);
     }
 
 }

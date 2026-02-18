@@ -921,6 +921,8 @@ function renderMyGames(id, games) {
             title.prepend($("<i/>").addClass('me-2 text-danger bi-exclamation-triangle'));
         } else if (!self.current) {
             title.prepend($("<i/>").addClass('me-2 bi-bell'));
+        } else if (game.isOld()) {
+            title.prepend($("<i/>").addClass('me-2 text-danger bi-clock-history'));
         }
         players.append(predator, activePlayer, prey);
         gameRow.append(header, players);
